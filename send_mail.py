@@ -49,7 +49,7 @@ def send_email(body: str, day: int):
     msg["To"] = XCOVER_EMAIL
 
     with smtplib.SMTP_SSL("smtp.protonmail.ch", 465) as server:
-        server.login(os.environ["PROTON_SMTP_TOKEN"], os.environ["PROTON_SMTP_TOKEN"])
+        server.login("contact@aouayti.fr", os.environ["PROTON_SMTP_TOKEN"])
         server.sendmail(FROM_EMAIL, XCOVER_EMAIL, msg.as_string())
 
 if __name__ == "__main__":
