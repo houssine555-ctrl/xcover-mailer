@@ -5,7 +5,7 @@ from email.mime.text import MIMEText
 from datetime import date
 
 XCOVER_EMAIL = "support@xcover.com"
-FROM_EMAIL = "houssine555@proton.me"
+FROM_EMAIL = "contact@aouayti.fr"
 CLAIM_REF = "NGH8N-PCF6W-INS"
 START_DATE = date(2026, 4, 23)
 
