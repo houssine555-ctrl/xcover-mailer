@@ -6,7 +6,7 @@ from datetime import date
 
 XCOVER_EMAIL = "support@xcover.com"
 FROM_EMAIL = "contact@aouayti.fr"
-CLAIM_REF = "NGH8N-PCF6W-INS"
+CLAIM_REF = "RTTNK-6JG33-CLA"
 START_DATE = date(2026, 4, 23)
 
 def get_day_number():
