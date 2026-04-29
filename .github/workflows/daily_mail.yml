@@ -2,7 +2,8 @@ name: Daily XCover Mail
 
 on:
   schedule:
-    - cron: '0 9 * * *'
+    - cron: '0 3 * * *'   # 3h UTC = 5h France (envoi nuit)
+    - cron: '0 11 * * *'  # 11h UTC = 13h France (envoi jour)
   workflow_dispatch:
 
 jobs:
@@ -14,7 +15,17 @@ jobs:
         with:
           python-version: '3.11'
       - run: pip install anthropic
+      - name: Determine slot
+        id: slot
+        run: |
+          HOUR=$(date -u +%H)
+          if [ "$HOUR" -lt 8 ]; then
+            echo "slot=night" >> $GITHUB_OUTPUT
+          else
+            echo "slot=day" >> $GITHUB_OUTPUT
+          fi
       - run: python send_mail.py
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           PROTON_SMTP_TOKEN: ${{ secrets.PROTON_SMTP_TOKEN }}
+          SLOT: ${{ steps.slot.outputs.slot }}
