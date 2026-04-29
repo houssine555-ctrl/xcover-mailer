@@ -12,8 +12,8 @@ POLICY_REF = "NGH8N-PCF6W-INS"
 START_DATE = date(2026, 4, 23)
 
 LANGUAGES = [
-    "English", "Mandarin Chinese", "Hindi", "Spanish",
-    "French", "Arabic", "Bengali", "Portuguese"
+    "English", "Mandarin Chinese", "Spanish",
+    "French", "Arabic", "Portuguese", "Korean", "Japanese"
 ]
 
 ANGLES = [
@@ -31,14 +31,14 @@ def get_day_number():
     return (date.today() - START_DATE).days + 1
 
 def generate_email(day: int, slot: str) -> tuple:
-    if day <= 7:
-        tone = "polite but firm"
-    elif day <= 21:
-        tone = "increasingly frustrated, hinting at legal options"
-    elif day <= 42:
-        tone = "very insistent, explicitly mentioning ACPR complaint and tribunal judiciaire"
-    else:
-        tone = "final warning, stating legal action is imminent"
+    if day <= 3:
+    tone = "polite but firm"
+elif day <= 7:
+    tone = "increasingly frustrated, hinting at legal options"
+elif day <= 14:
+    tone = "very insistent, explicitly mentioning ACPR complaint and tribunal judiciaire"
+else:
+    tone = "final warning, stating legal action is imminent"
 
     language = random.choice(LANGUAGES)
     angle = random.choice(ANGLES)
