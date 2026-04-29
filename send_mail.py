@@ -1,50 +1,76 @@
 import anthropic
 import smtplib
 import os
+import random
 from email.mime.text import MIMEText
 from datetime import date
 
-XCOVER_EMAIL = "support@xcover.com"
 FROM_EMAIL = "contact@aouayti.fr"
+XCOVER_EMAIL = "support@xcover.com"
 CLAIM_REF = "RTTNK-6JG33-CLA"
+POLICY_REF = "NGH8N-PCF6W-INS"
 START_DATE = date(2026, 4, 23)
+
+LANGUAGES = [
+    "English", "Mandarin Chinese", "Hindi", "Spanish",
+    "French", "Arabic", "Bengali", "Portuguese"
+]
+
+ANGLES = [
+    "Focus on the fact that the exclusion doesn't exist in the contract and ask them to cite the exact clause and page number.",
+    "Focus on the inconsistency with the previous claim 9R7GG-LEP47-CLA where identical electronics in checked baggage were reimbursed.",
+    "Focus on the fact that the bag was forcibly checked at the gate by Delta, not a choice made by the customer.",
+    "Focus on the Timberland boots being ignored despite multiple invoice submissions.",
+    "Focus on the arithmetic error in their decision and the lack of professionalism it demonstrates.",
+    "Focus on the overall timeline — several months without resolution — and the impact on the customer.",
+    "Focus on the contradiction between their glossary defining laptops as covered electronic devices and their refusal to pay.",
+    "Focus on the point 22 exclusion applying only to shipped goods, not airline checked baggage, and how their interpretation is legally incorrect.",
+]
 
 def get_day_number():
     return (date.today() - START_DATE).days + 1
 
-def generate_email(day: int) -> str:
+def generate_email(day: int, slot: str) -> tuple:
     if day <= 7:
         tone = "polite but firm"
     elif day <= 21:
-        tone = "increasingly frustrated, mentioning legal options like ACPR"
+        tone = "increasingly frustrated, hinting at legal options"
     elif day <= 42:
-        tone = "very insistent, explicitly threatening ACPR complaint and tribunal judiciaire"
+        tone = "very insistent, explicitly mentioning ACPR complaint and tribunal judiciaire"
     else:
         tone = "final warning, stating legal action is imminent"
 
+    language = random.choice(LANGUAGES)
+    angle = random.choice(ANGLES)
+
     client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
-    
+
     message = client.messages.create(
         model="claude-sonnet-4-6",
         max_tokens=1000,
         messages=[{
             "role": "user",
-            "content": f"""You are writing email #{day} in an ongoing dispute with XCover insurance (claim ref: {CLAIM_REF}).
+            "content": f"""You are writing email #{day} ({slot} send) in an ongoing dispute with XCover insurance.
 
-The situation: XCover refuses to reimburse a stolen Samsung Galaxy Book5 Pro laptop (capped at €250 under policy) by citing a checked baggage exclusion that literally does not exist anywhere in the contract. The policy explicitly covers electronic devices stolen during a trip (p.10/23), laptops are named in the glossary (p.17/23), and the only transport exclusion (p.11/23 point 22) covers shipped goods not airline checked baggage. They also previously reimbursed identical electronics in checked baggage under the same policy (claim 9R7GG-LEP47-CLA). They also forgot Timberland boots 220 euros, 2 years old despite invoice being submitted multiple times.
+Claim ref: {CLAIM_REF}
+Policy ref: {POLICY_REF}
 
-Total owed beyond what was paid: approximately 400 euros.
+Background: XCover refuses to reimburse a stolen Samsung Galaxy Book5 Pro laptop (capped at 250 euros under policy) by citing a checked baggage exclusion that does not exist anywhere in the contract. The policy explicitly covers electronic devices stolen during a trip (p.10/23), laptops are named in the glossary (p.17/23), and the only transport exclusion (p.11/23 point 22) covers shipped goods only. They also previously reimbursed identical electronics in checked baggage under the same policy (claim 9R7GG-LEP47-CLA). Timberland boots (220 euros, 2 years old) also ignored despite invoice submitted multiple times. Total owed: approximately 400 euros.
 
-Tone for today (day {day}): {tone}
+Tone: {tone}
+Angle for this email: {angle}
+Write the email in: {language}
 
-Write a short, direct email in English. No bullet points. No bold. Do not use em dashes. Vary the angle slightly from a standard complaint, mention a specific detail of the case to show this is not a template. Sign off as Houssine Aouayti."""
+Write a short, direct email. No bullet points. No bold. No em dashes. Sign off as Houssine Aouayti. Return only the email body, no subject line."""
         }]
     )
-    return message.content[0].text
 
-def send_email(body: str, day: int):
-    msg = MIMEText(body)
-    msg["Subject"] = f"Claim {CLAIM_REF} — Follow-up #{day}"
+    subject = f"Claim {CLAIM_REF} / Policy {POLICY_REF} — Follow-up #{day} ({slot})"
+    return subject, message.content[0].text, language
+
+def send_email(subject: str, body: str, day: int):
+    msg = MIMEText(body, "plain", "utf-8")
+    msg["Subject"] = subject
     msg["From"] = FROM_EMAIL
     msg["To"] = XCOVER_EMAIL
 
@@ -53,9 +79,11 @@ def send_email(body: str, day: int):
         server.sendmail(FROM_EMAIL, XCOVER_EMAIL, msg.as_string())
 
 if __name__ == "__main__":
+    slot = os.environ.get("SLOT", "day")
     day = get_day_number()
-    print(f"Day {day}")
-    body = generate_email(day)
+    print(f"Day {day} — Slot: {slot}")
+    subject, body, language = generate_email(day, slot)
+    print(f"Language: {language}")
     print(body)
-    send_email(body, day)
+    send_email(subject, body, day)
     print("Sent.")
