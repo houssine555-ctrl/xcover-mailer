@@ -32,13 +32,13 @@ def get_day_number():
 
 def generate_email(day: int, slot: str) -> tuple:
     if day <= 3:
-    tone = "polite but firm"
-elif day <= 7:
-    tone = "increasingly frustrated, hinting at legal options"
-elif day <= 14:
-    tone = "very insistent, explicitly mentioning ACPR complaint and tribunal judiciaire"
-else:
-    tone = "final warning, stating legal action is imminent"
+        tone = "polite but firm"
+    elif day <= 7:
+        tone = "increasingly frustrated, hinting at legal options"
+    elif day <= 14:
+        tone = "very insistent, explicitly mentioning ACPR complaint and tribunal judiciaire"
+    else:
+        tone = "final warning, stating legal action is imminent"
 
     language = random.choice(LANGUAGES)
     angle = random.choice(ANGLES)
